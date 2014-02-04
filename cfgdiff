@@ -4,7 +4,7 @@ from __future__ import print_function
 
 import sys
 import io
-import optparse
+import argparse
 import collections
 
 try:
@@ -27,27 +27,22 @@ except ImportError:
 
 
 usage = "usage: %prog [options] fromfile tofile"
-parser = optparse.OptionParser(usage)
-parser.add_option("-c", action="store_true", default=False,
+parser = argparse.ArgumentParser()
+parser.add_argument("-c", action="store_true", default=False,
                   help='Produce a context format diff (default)')
-parser.add_option("-u", action="store_true", default=False,
+parser.add_argument("-u", action="store_true", default=False,
                   help='Produce a unified format diff')
 hlp = 'Produce HTML side by side diff (can use -c and -l in conjunction)'
-parser.add_option("-m", action="store_true", default=False, help=hlp)
-parser.add_option("-n", action="store_true", default=False,
+parser.add_argument("-m", action="store_true", default=False, help=hlp)
+parser.add_argument("-n", action="store_true", default=False,
                   help='Produce a ndiff format diff')
-parser.add_option("-l", "--lines", type="int", default=3,
+parser.add_argument("-l", "--lines", type=int, default=3,
                   help='Set number of context lines (default 3)')
-(options, args) = parser.parse_args()
-
-if len(args) == 0:
-    parser.print_help()
-    sys.exit(1)
-if len(args) != 2:
-    parser.error("need to specify both a fromfile and tofile")
+parser.add_argument('fromfile')
+parser.add_argument('tofile')
+options = parser.parse_args()
 
 n = options.lines
-fromfile, tofile = args
 
 class SortedDict(collections.MutableMapping):
     __slots__ = '_data'
@@ -107,21 +102,21 @@ class YAMLDiff(DiffBase):
             yaml.safe_dump(self.config, self.pretty, default_flow_style=False, indent=2)
 
 
-fromini = INIDiff(fromfile)
-toini = INIDiff(tofile)
+fromini = INIDiff(options.fromfile)
+toini = INIDiff(options.tofile)
 
 fromlines = fromini.readlines()
 tolines = toini.readlines()
 
 if options.u:
-    diff = difflib.unified_diff(fromlines, tolines, fromfile, tofile, n=n)
+    diff = difflib.unified_diff(fromlines, tolines, options.fromfile, options.tofile, n=n)
 elif options.n:
     diff = difflib.ndiff(fromlines, tolines)
 elif options.m:
-    diff = difflib.HtmlDiff().make_file(fromlines, tolines, fromfile,
-                                        tofile, context=options.c,
+    diff = difflib.HtmlDiff().make_file(fromlines, tolines, options.fromfile,
+                                        options.tofile, context=options.c,
                                         numlines=n)
 else:
-    diff = difflib.context_diff(fromlines, tolines, fromfile, tofile, n=n)
+    diff = difflib.context_diff(fromlines, tolines, options.fromfile, options.tofile, n=n)
 
 sys.stdout.writelines(diff)
