@@ -41,23 +41,32 @@ if len(args) != 2:
 n = options.lines
 fromfile, tofile = args
 
-config1 = configparser.RawConfigParser(allow_no_value=True, dict_type=dict)
-config2 = configparser.RawConfigParser(allow_no_value=True, dict_type=dict)
+class DiffBase(object):
 
-config1.read(fromfile)
-config2.read(tofile)
+    def __init__(self, filename):
+        self.filename = filename
+        self.pretty = StringIO()
+        self.parse()
 
-pretty1 = StringIO()
-pretty2 = StringIO()
+    def parse(self):
+        pass
 
-config1.write(pretty1)
-config2.write(pretty2)
+    def readlines(self):
+        self.pretty.seek(0)
+        return self.pretty.readlines()
 
-pretty1.seek(0)
-pretty2.seek(0)
+class INIDiff(DiffBase):
 
-fromlines = pretty1.readlines()
-tolines = pretty2.readlines()
+    def parse(self):
+        self.config = configparser.RawConfigParser(allow_no_value=True, dict_type=dict)
+        self.config.read(self.filename)
+        self.config.write(self.pretty)
+
+fromini = INIDiff(fromfile)
+toini = INIDiff(tofile)
+
+fromlines = fromini.readlines()
+tolines = toini.readlines()
 
 if options.u:
     diff = difflib.unified_diff(fromlines, tolines, fromfile, tofile, n=n)
