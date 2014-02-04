@@ -20,8 +20,11 @@ except ImportError:
 
 import json
 
+supported_formats = ['ini', 'json']
+
 try:
     import yaml
+    supported_formats.append('yaml')
 except ImportError:
     yaml = None
 
@@ -38,6 +41,9 @@ parser.add_argument("-n", action="store_true", default=False,
                   help='Produce a ndiff format diff')
 parser.add_argument("-l", "--lines", type=int, default=3,
                   help='Set number of context lines (default 3)')
+parser.add_argument('-i', '--input-format', dest='inputformat', default='ini',
+                    choices=supported_formats,
+                    help='parse input as ini/json/yaml [default: %(default)s]')
 parser.add_argument('fromfile')
 parser.add_argument('tofile')
 options = parser.parse_args()
@@ -101,9 +107,15 @@ class YAMLDiff(DiffBase):
             self.config = yaml.safe_load(f)
             yaml.safe_dump(self.config, self.pretty, default_flow_style=False, indent=2)
 
+if options.inputformat == 'ini':
+  cls = INIDiff
+elif options.inputformat == 'json':
+  cls = JSONDiff
+elif options.inputformat == 'yaml':
+  cls = YAMLDiff
 
-fromini = INIDiff(options.fromfile)
-toini = INIDiff(options.tofile)
+fromini = cls(options.fromfile)
+toini = cls(options.tofile)
 
 fromlines = fromini.readlines()
 tolines = toini.readlines()
