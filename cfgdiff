@@ -20,6 +20,11 @@ except ImportError:
 
 import json
 
+try:
+    import yaml
+except ImportError:
+    yaml = None
+
 
 usage = "usage: %prog [options] fromfile tofile"
 parser = optparse.OptionParser(usage)
@@ -93,6 +98,13 @@ class JSONDiff(DiffBase):
         with open(self.filename) as f:
             self.config = json.load(f)
             json.dump(self.config, self.pretty, sort_keys=True, indent=4, separators=(',', ': '))
+
+class YAMLDiff(DiffBase):
+
+    def parse(self):
+        with open(self.filename) as f:
+            self.config = yaml.safe_load(f)
+            yaml.safe_dump(self.config, self.pretty, default_flow_style=False, indent=2)
 
 
 fromini = INIDiff(fromfile)
