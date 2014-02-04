@@ -5,6 +5,7 @@ from __future__ import print_function
 import sys
 import io
 import optparse
+import collections
 
 try:
     from io import StringIO
@@ -43,6 +44,28 @@ if len(args) != 2:
 n = options.lines
 fromfile, tofile = args
 
+class SortedDict(collections.MutableMapping):
+    __slots__ = '_data'
+
+    def __init__(self):
+        self._data = {}
+
+    def __getitem__(self, key):
+        return self._data[key]
+
+    def __setitem__(self, key, value):
+        self._data[key] = value
+
+    def __delitem__(self, key):
+        del self._data[key]
+
+    def __iter__(self):
+        return iter(sorted(self._data))
+
+    def __len__(self):
+        return len(self._data)
+
+
 class DiffBase(object):
 
     def __init__(self, filename):
@@ -60,7 +83,7 @@ class DiffBase(object):
 class INIDiff(DiffBase):
 
     def parse(self):
-        self.config = configparser.RawConfigParser(allow_no_value=True, dict_type=dict)
+        self.config = configparser.RawConfigParser(allow_no_value=True, dict_type=SortedDict)
         self.config.read(self.filename)
         self.config.write(self.pretty)
 
