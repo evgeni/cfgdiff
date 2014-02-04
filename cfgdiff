@@ -17,6 +17,8 @@ try:
 except ImportError:
     import ConfigParser as configparser
 
+import json
+
 
 usage = "usage: %prog [options] fromfile tofile"
 parser = optparse.OptionParser(usage)
@@ -61,6 +63,14 @@ class INIDiff(DiffBase):
         self.config = configparser.RawConfigParser(allow_no_value=True, dict_type=dict)
         self.config.read(self.filename)
         self.config.write(self.pretty)
+
+class JSONDiff(DiffBase):
+
+    def parse(self):
+        with open(self.filename) as f:
+            self.config = json.load(f)
+            json.dump(self.config, self.pretty, sort_keys=True, indent=4, separators=(',', ': '))
+
 
 fromini = INIDiff(fromfile)
 toini = INIDiff(tofile)
