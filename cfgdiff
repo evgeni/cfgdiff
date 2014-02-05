@@ -148,4 +148,8 @@ elif options.m:
 else:
     diff = difflib.context_diff(fromlines, tolines, options.fromfile, options.tofile, n=n)
 
-sys.stdout.writelines(diff)
+rc = 0
+for line in diff:
+    sys.stdout.write(line)
+    rc = 1
+sys.exit(rc)
