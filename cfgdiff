@@ -28,6 +28,11 @@ try:
 except ImportError:
     yaml = None
 
+try:
+    import lxml.etree
+    supported_formats.append('xml')
+except ImportError:
+    pass
 
 usage = "usage: %prog [options] fromfile tofile"
 parser = argparse.ArgumentParser()
@@ -107,12 +112,24 @@ class YAMLDiff(DiffBase):
             self.config = yaml.safe_load(f)
             yaml.safe_dump(self.config, self.pretty, default_flow_style=False, indent=2)
 
+class XMLDiff(DiffBase):
+
+    def parse(self):
+        parser = lxml.etree.XMLParser(remove_blank_text=True, remove_comments=True)
+        self.config = lxml.etree.parse(self.filename, parser)
+        # via https://stackoverflow.com/a/8387132/1098563
+        for parent in self.config.xpath('//*[./*]'):
+            parent[:] = sorted(parent,key=lambda x: x.tag)
+        self.config.write(self.pretty, pretty_print=True)
+
 if options.inputformat == 'ini':
   cls = INIDiff
 elif options.inputformat == 'json':
   cls = JSONDiff
 elif options.inputformat == 'yaml':
   cls = YAMLDiff
+elif options.inputformat == 'xml':
+  cls = XMLDiff
 
 fromini = cls(options.fromfile)
 toini = cls(options.tofile)
