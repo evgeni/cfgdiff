@@ -38,15 +38,15 @@ except ImportError:
 usage = "usage: %prog [options] fromfile tofile"
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", action="store_true", default=False,
-                  help='Produce a context format diff (default)')
+                    help='Produce a context format diff (default)')
 parser.add_argument("-u", action="store_true", default=False,
-                  help='Produce a unified format diff')
+                    help='Produce a unified format diff')
 hlp = 'Produce HTML side by side diff (can use -c and -l in conjunction)'
 parser.add_argument("-m", action="store_true", default=False, help=hlp)
 parser.add_argument("-n", action="store_true", default=False,
-                  help='Produce a ndiff format diff')
+                    help='Produce a ndiff format diff')
 parser.add_argument("-l", "--lines", type=int, default=3,
-                  help='Set number of context lines (default 3)')
+                    help='Set number of context lines (default 3)')
 parser.add_argument('-i', '--input-format', dest='inputformat', default='ini',
                     choices=supported_formats,
                     help='parse input as ini/json/yaml [default: %(default)s]')
@@ -59,6 +59,7 @@ parser.add_argument('tofile')
 options = parser.parse_args()
 
 n = options.lines
+
 
 class SortedDict(collections.MutableMapping):
     __slots__ = '_data'
@@ -97,12 +98,14 @@ class DiffBase(object):
         self.pretty.seek(0)
         return self.pretty.readlines()
 
+
 class INIDiff(DiffBase):
 
     def parse(self):
         self.config = configparser.RawConfigParser(allow_no_value=True, dict_type=SortedDict)
         self.config.read(self.filename)
         self.config.write(self.pretty)
+
 
 class JSONDiff(DiffBase):
 
@@ -111,12 +114,14 @@ class JSONDiff(DiffBase):
             self.config = json.load(f)
             json.dump(self.config, self.pretty, sort_keys=True, indent=4, separators=(',', ': '))
 
+
 class YAMLDiff(DiffBase):
 
     def parse(self):
         with open(self.filename) as f:
             self.config = yaml.safe_load(f)
             yaml.safe_dump(self.config, self.pretty, default_flow_style=False, indent=2)
+
 
 class XMLDiff(DiffBase):
 
@@ -125,17 +130,17 @@ class XMLDiff(DiffBase):
         self.config = lxml.etree.parse(self.filename, parser)
         # via https://stackoverflow.com/a/8387132/1098563
         for parent in self.config.xpath('//*[./*]'):
-            parent[:] = sorted(parent,key=lambda x: x.tag)
+            parent[:] = sorted(parent, key=lambda x: x.tag)
         self.config.write(self.pretty, pretty_print=True)
 
 if options.inputformat == 'ini':
-  cls = INIDiff
+    cls = INIDiff
 elif options.inputformat == 'json':
-  cls = JSONDiff
+    cls = JSONDiff
 elif options.inputformat == 'yaml':
-  cls = YAMLDiff
+    cls = YAMLDiff
 elif options.inputformat == 'xml':
-  cls = XMLDiff
+    cls = XMLDiff
 
 fromlist = []
 tolist = []
