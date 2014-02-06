@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 
+import os
 import sys
 import io
 import argparse
@@ -49,6 +50,10 @@ parser.add_argument("-l", "--lines", type=int, default=3,
 parser.add_argument('-i', '--input-format', dest='inputformat', default='ini',
                     choices=supported_formats,
                     help='parse input as ini/json/yaml [default: %(default)s]')
+parser.add_argument('-r', '--recursive', dest='recursive', action='store_true', default=False,
+                    help='recursively compare any subdirectories found')
+parser.add_argument('-N', '--new-file', dest='newfile', action="store_true", default=False,
+                    help='treat absent files as empty')
 parser.add_argument('fromfile')
 parser.add_argument('tofile')
 options = parser.parse_args()
@@ -82,7 +87,8 @@ class DiffBase(object):
     def __init__(self, filename):
         self.filename = filename
         self.pretty = StringIO()
-        self.parse()
+        if filename != '/dev/null':
+            self.parse()
 
     def parse(self):
         pass
@@ -131,25 +137,63 @@ elif options.inputformat == 'yaml':
 elif options.inputformat == 'xml':
   cls = XMLDiff
 
-fromini = cls(options.fromfile)
-toini = cls(options.tofile)
-
-fromlines = fromini.readlines()
-tolines = toini.readlines()
-
-if options.u:
-    diff = difflib.unified_diff(fromlines, tolines, options.fromfile, options.tofile, n=n)
-elif options.n:
-    diff = difflib.ndiff(fromlines, tolines)
-elif options.m:
-    diff = difflib.HtmlDiff().make_file(fromlines, tolines, options.fromfile,
-                                        options.tofile, context=options.c,
-                                        numlines=n)
+fromlist = []
+tolist = []
+if options.recursive and os.path.isdir(options.fromfile) and os.path.isdir(options.tofile):
+    for root, _, files in os.walk(options.fromfile):
+        for f in files:
+            x = os.path.join(root, f)
+            fromlist.append(x)
+            y = os.path.join(options.tofile, os.path.relpath(x, options.fromfile))
+            if os.path.exists(y):
+                tolist.append(y)
+            else:
+                tolist.append('/dev/null')
+    for root, _, files in os.walk(options.tofile):
+        for f in files:
+            x = os.path.join(root, f)
+            if not x in tolist:
+                tolist.append(x)
+                y = os.path.join(options.fromfile, os.path.relpath(x, options.tofile))
+                if os.path.exists(y):
+                    fromlist.append(y)
+                else:
+                    fromlist.append('/dev/null')
+elif options.recursive and (os.path.isdir(options.fromfile) or os.path.isdir(options.tofile)):
+    print("cannot compare folders and files")
+    sys.exit(2)
 else:
-    diff = difflib.context_diff(fromlines, tolines, options.fromfile, options.tofile, n=n)
+    fromlist.append(options.fromfile)
+    tolist.append(options.tofile)
 
 rc = 0
-for line in diff:
-    sys.stdout.write(line)
-    rc = 1
+for fromfile, tofile in zip(fromlist, tolist):
+    if '/dev/null' in (fromfile, tofile) and not options.newfile:
+        rc = 1
+        if fromfile != '/dev/null':
+            print('Only in %s: %s' % (options.fromfile, os.path.relpath(fromfile, options.fromfile)))
+        else:
+            print('Only in %s: %s' % (options.tofile, os.path.relpath(tofile, options.tofile)))
+        continue
+
+    fromini = cls(fromfile)
+    toini = cls(tofile)
+
+    fromlines = fromini.readlines()
+    tolines = toini.readlines()
+
+    if options.u:
+        diff = difflib.unified_diff(fromlines, tolines, fromfile, tofile, n=n)
+    elif options.n:
+        diff = difflib.ndiff(fromlines, tolines)
+    elif options.m:
+        diff = difflib.HtmlDiff().make_file(fromlines, tolines, fromfile,
+                                            tofile, context=options.c,
+                                            numlines=n)
+    else:
+        diff = difflib.context_diff(fromlines, tolines, fromfile, tofile, n=n)
+
+    for line in diff:
+        sys.stdout.write(line)
+        rc = 1
 sys.exit(rc)
