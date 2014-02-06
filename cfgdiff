@@ -92,8 +92,12 @@ class DiffBase(object):
     def __init__(self, filename):
         self.filename = filename
         self.pretty = StringIO()
+        self.error = None
         if filename != '/dev/null':
-            self.parse()
+            try:
+                self.parse()
+            except Exception as e:
+                self.error = repr(e)
 
     def parse(self):
         pass
@@ -198,6 +202,15 @@ for fromfile, tofile in zip(fromlist, tolist):
 
     fromini = cls(fromfile)
     toini = cls(tofile)
+
+    if fromini.error:
+        print("%s could not be parsed as a %s file:" % (fromfile, options.inputformat))
+        print(" %s" % (fromini.error))
+        print("It will be interpreted as an empty file.")
+    if toini.error:
+        print("%s could not be parsed as a %s file:" % (tofile, options.inputformat))
+        print(" %s" % (toini.error))
+        print("It will be interpreted as an empty file.")
 
     fromlines = fromini.readlines()
     tolines = toini.readlines()
