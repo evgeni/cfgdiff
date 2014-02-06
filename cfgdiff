@@ -8,15 +8,18 @@ import io
 import argparse
 import collections
 
-try:
+PY2 = sys.version_info[0] == 2
+PY3 = sys.version_info[0] == 3
+
+if PY2:
     from cStringIO import StringIO
-except ImportError:
+else:
     from io import StringIO
 import difflib
 
-try:
+if PY3:
     import configparser
-except ImportError:
+else:
     import ConfigParser as configparser
 
 import json
@@ -103,8 +106,13 @@ class DiffBase(object):
 class INIDiff(DiffBase):
 
     def parse(self):
-        self.config = configparser.RawConfigParser(allow_no_value=True,
-                                                   dict_type=SortedDict)
+        if PY3:
+            self.config = configparser.RawConfigParser(allow_no_value=True,
+                                                       dict_type=SortedDict,
+                                                       strict=False)
+        else:
+            self.config = configparser.RawConfigParser(allow_no_value=True,
+                                                       dict_type=SortedDict)
         self.config.read(self.filename)
         self.config.write(self.pretty)
 
