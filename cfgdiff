@@ -50,10 +50,11 @@ parser.add_argument("-l", "--lines", type=int, default=3,
 parser.add_argument('-i', '--input-format', dest='inputformat', default='ini',
                     choices=supported_formats,
                     help='parse input as ini/json/yaml [default: %(default)s]')
-parser.add_argument('-r', '--recursive', dest='recursive', action='store_true', default=False,
+parser.add_argument('-r', '--recursive', dest='recursive', action='store_true',
+                    default=False,
                     help='recursively compare any subdirectories found')
-parser.add_argument('-N', '--new-file', dest='newfile', action="store_true", default=False,
-                    help='treat absent files as empty')
+parser.add_argument('-N', '--new-file', dest='newfile', action="store_true",
+                    default=False, help='treat absent files as empty')
 parser.add_argument('fromfile')
 parser.add_argument('tofile')
 options = parser.parse_args()
@@ -102,7 +103,8 @@ class DiffBase(object):
 class INIDiff(DiffBase):
 
     def parse(self):
-        self.config = configparser.RawConfigParser(allow_no_value=True, dict_type=SortedDict)
+        self.config = configparser.RawConfigParser(allow_no_value=True,
+                                                   dict_type=SortedDict)
         self.config.read(self.filename)
         self.config.write(self.pretty)
 
@@ -112,7 +114,8 @@ class JSONDiff(DiffBase):
     def parse(self):
         with open(self.filename) as f:
             self.config = json.load(f)
-            json.dump(self.config, self.pretty, sort_keys=True, indent=4, separators=(',', ': '))
+            json.dump(self.config, self.pretty, sort_keys=True, indent=4,
+                      separators=(',', ': '))
 
 
 class YAMLDiff(DiffBase):
@@ -120,13 +123,15 @@ class YAMLDiff(DiffBase):
     def parse(self):
         with open(self.filename) as f:
             self.config = yaml.safe_load(f)
-            yaml.safe_dump(self.config, self.pretty, default_flow_style=False, indent=2)
+            yaml.safe_dump(self.config, self.pretty, default_flow_style=False,
+                           indent=2)
 
 
 class XMLDiff(DiffBase):
 
     def parse(self):
-        parser = lxml.etree.XMLParser(remove_blank_text=True, remove_comments=True)
+        parser = lxml.etree.XMLParser(remove_blank_text=True,
+                                      remove_comments=True)
         self.config = lxml.etree.parse(self.filename, parser)
         # via https://stackoverflow.com/a/8387132/1098563
         for parent in self.config.xpath('//*[./*]'):
@@ -176,9 +181,11 @@ for fromfile, tofile in zip(fromlist, tolist):
     if '/dev/null' in (fromfile, tofile) and not options.newfile:
         rc = 1
         if fromfile != '/dev/null':
-            print('Only in %s: %s' % (options.fromfile, os.path.relpath(fromfile, options.fromfile)))
+            x = os.path.relpath(fromfile, options.fromfile)
+            print('Only in %s: %s' % (options.fromfile, x))
         else:
-            print('Only in %s: %s' % (options.tofile, os.path.relpath(tofile, options.tofile)))
+            x = os.path.relpath(tofile, options.tofile)
+            print('Only in %s: %s' % (options.tofile, x))
         continue
 
     fromini = cls(fromfile)
