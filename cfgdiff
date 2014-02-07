@@ -93,7 +93,7 @@ class DiffBase(object):
         self.filename = filename
         self.pretty = StringIO()
         self.error = None
-        if filename != '/dev/null':
+        if filename != '/dev/null' and os.path.getsize(filename) > 0:
             try:
                 self.parse()
             except Exception as e:
