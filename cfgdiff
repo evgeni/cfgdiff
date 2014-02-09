@@ -38,6 +38,12 @@ try:
 except ImportError:
     pass
 
+try:
+    import configobj
+    supported_formats.append('conf')
+except ImportError:
+    configobj = None
+
 usage = "usage: %prog [options] fromfile tofile"
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", action="store_true", default=False,
@@ -85,6 +91,24 @@ class SortedDict(collections.MutableMapping):
 
     def __len__(self):
         return len(self._data)
+
+
+if configobj:
+    class StrippedConfigObj(configobj.ConfigObj):
+
+        def write(self, outfile=None, section=None):
+            if section is None:
+                section = self
+                self.initial_comment = ''
+                self.final_comment = ''
+            section.scalars.sort()
+            section.sections.sort()
+            for entry in (section.scalars + section.sections):
+                section.comments[entry] = []
+                section.inline_comments[entry] = ''
+            if section is self:
+                section = None
+            return super(StrippedConfigObj, self).write(outfile, section)
 
 
 class DiffBase(object):
@@ -150,6 +174,13 @@ class XMLDiff(DiffBase):
             parent[:] = sorted(parent, key=lambda x: x.tag)
         self.config.write(self.pretty, pretty_print=True)
 
+
+class ConfigDiff(DiffBase):
+
+    def parse(self):
+        self.config = StrippedConfigObj(self.filename)
+        self.config.write(self.pretty)
+
 if options.inputformat == 'ini':
     cls = INIDiff
 elif options.inputformat == 'json':
@@ -158,6 +189,8 @@ elif options.inputformat == 'yaml':
     cls = YAMLDiff
 elif options.inputformat == 'xml':
     cls = XMLDiff
+elif options.inputformat == 'conf':
+    cls = ConfigDiff
 
 fromlist = []
 tolist = []
