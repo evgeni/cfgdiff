@@ -58,7 +58,8 @@ parser.add_argument("-l", "--lines", type=int, default=3,
                     help='Set number of context lines (default 3)')
 parser.add_argument('-i', '--input-format', dest='inputformat', default='ini',
                     choices=supported_formats,
-                    help='parse input as ini/json/yaml [default: %(default)s]')
+                    help='parse input as %s [default: %%(default)s]' %
+                    '/'.join(supported_formats))
 parser.add_argument('-r', '--recursive', dest='recursive', action='store_true',
                     default=False,
                     help='recursively compare any subdirectories found')
