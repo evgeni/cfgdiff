@@ -60,11 +60,12 @@ hlp = 'Produce HTML side by side diff (can use -c and -l in conjunction)'
 parser.add_argument("-m", action="store_true", default=False, help=hlp)
 parser.add_argument("-n", action="store_true", default=False,
                     help='Produce a ndiff format diff')
+hlp = 'Set number of context lines (default: %(default)s)'
 parser.add_argument("-l", "--lines", type=int, default=3,
-                    help='Set number of context lines (default 3)')
+                    help=hlp)
 parser.add_argument('-i', '--input-format', dest='inputformat', default='ini',
                     choices=supported_formats,
-                    help='parse input as %s [default: %%(default)s]' %
+                    help='parse input as %s (default: %%(default)s)' %
                     '/'.join(supported_formats))
 parser.add_argument('-r', '--recursive', dest='recursive', action='store_true',
                     default=False,
