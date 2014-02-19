@@ -44,6 +44,12 @@ try:
 except ImportError:
     configobj = None
 
+try:
+    import reconfigure
+    supported_formats.append('reconf')
+except ImportError:
+    reconfigure = None
+
 usage = "usage: %prog [options] fromfile tofile"
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", action="store_true", default=False,
@@ -65,6 +71,11 @@ parser.add_argument('-r', '--recursive', dest='recursive', action='store_true',
                     help='recursively compare any subdirectories found')
 parser.add_argument('-N', '--new-file', dest='newfile', action="store_true",
                     default=False, help='treat absent files as empty')
+if reconfigure:
+    hlp = 'Use this reconfigure.configs class (default: %(default)s)'
+    parser.add_argument('-R', '--reconf-class', dest='reconfclass',
+                        default='SambaConfig',
+                        help=hlp)
 parser.add_argument('fromfile')
 parser.add_argument('tofile')
 options = parser.parse_args()
@@ -182,6 +193,19 @@ class ConfigDiff(DiffBase):
         self.config = StrippedConfigObj(self.filename)
         self.config.write(self.pretty)
 
+
+reconfcls = None
+
+
+class ReconfigureDiff(DiffBase):
+
+    def parse(self):
+        with open(self.filename) as f:
+            self.parser = reconfcls(content=f.read())
+            l = self.parser.load()
+            s = l.save()
+            self.pretty.write(s[None])
+
 if options.inputformat == 'ini':
     cls = INIDiff
 elif options.inputformat == 'json':
@@ -192,6 +216,9 @@ elif options.inputformat == 'xml':
     cls = XMLDiff
 elif options.inputformat == 'conf':
     cls = ConfigDiff
+elif options.inputformat == 'reconf':
+    exec "from reconfigure.configs import %s as reconfcls" % options.reconfclass
+    cls = ReconfigureDiff
 
 fromlist = []
 tolist = []
