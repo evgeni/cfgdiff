@@ -72,6 +72,10 @@ parser.add_argument('-r', '--recursive', dest='recursive', action='store_true',
                     help='recursively compare any subdirectories found')
 parser.add_argument('-N', '--new-file', dest='newfile', action="store_true",
                     default=False, help='treat absent files as empty')
+parser.add_argument('-O', '--ordered-input', dest='ordered',
+                    action="store_true",
+                    default=False,
+                    help='do not change order of options in the input')
 if reconfigure:
     hlp = 'Use this reconfigure.configs class (default: %(default)s)'
     parser.add_argument('-R', '--reconf-class', dest='reconfclass',
@@ -114,8 +118,9 @@ if configobj:
                 section = self
                 self.initial_comment = ''
                 self.final_comment = ''
-            section.scalars.sort()
-            section.sections.sort()
+            if not options.ordered:
+                section.scalars.sort()
+                section.sections.sort()
             for entry in (section.scalars + section.sections):
                 section.comments[entry] = []
                 section.inline_comments[entry] = ''
@@ -147,13 +152,17 @@ class DiffBase(object):
 class INIDiff(DiffBase):
 
     def parse(self):
+        if options.ordered:
+            dicttype = collections.OrderedDict
+        else:
+            dicttype = SortedDict
         if PY3:
             self.config = configparser.RawConfigParser(allow_no_value=True,
-                                                       dict_type=SortedDict,
+                                                       dict_type=dicttype,
                                                        strict=False)
         else:
             self.config = configparser.RawConfigParser(allow_no_value=True,
-                                                       dict_type=SortedDict)
+                                                       dict_type=dicttype)
         self.config.read(self.filename)
         self.config.write(self.pretty)
 
@@ -161,9 +170,11 @@ class INIDiff(DiffBase):
 class JSONDiff(DiffBase):
 
     def parse(self):
+        sort_keys = options.ordered is False
         with open(self.filename) as f:
             self.config = json.load(f)
-            json.dump(self.config, self.pretty, sort_keys=True, indent=4,
+            json.dump(self.config, self.pretty,
+                      sort_keys=sort_keys, indent=4,
                       separators=(',', ': '))
 
 
@@ -183,8 +194,9 @@ class XMLDiff(DiffBase):
                                       remove_comments=True)
         self.config = lxml.etree.parse(self.filename, parser)
         # via https://stackoverflow.com/a/8387132/1098563
-        for parent in self.config.xpath('//*[./*]'):
-            parent[:] = sorted(parent, key=lambda x: x.tag)
+        if not options.ordered:
+            for parent in self.config.xpath('//*[./*]'):
+                parent[:] = sorted(parent, key=lambda x: x.tag)
         self.config.write(self.pretty, pretty_print=True)
 
 
