@@ -87,7 +87,7 @@ if configobj:
 
 class DiffBase(object):
 
-    def __init__(self, filename, ordered, parser=None):
+    def __init__(self, filename, ordered=False, parser=None):
         self.filename = filename
         self.ordered = ordered
         self.parser = parser
