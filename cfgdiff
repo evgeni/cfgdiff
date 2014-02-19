@@ -6,49 +6,8 @@ import os
 import sys
 import io
 import argparse
-import collections
-
-PY2 = sys.version_info[0] == 2
-PY3 = sys.version_info[0] == 3
-
-if PY2:
-    from cStringIO import StringIO
-else:
-    from io import StringIO
+import cfgdiff
 import difflib
-
-if PY3:
-    import configparser
-else:
-    import ConfigParser as configparser
-
-import json
-
-supported_formats = ['ini', 'json']
-
-try:
-    import yaml
-    supported_formats.append('yaml')
-except ImportError:
-    yaml = None
-
-try:
-    import lxml.etree
-    supported_formats.append('xml')
-except ImportError:
-    pass
-
-try:
-    import configobj
-    supported_formats.append('conf')
-except ImportError:
-    configobj = None
-
-try:
-    import reconfigure
-    supported_formats.append('reconf')
-except ImportError:
-    reconfigure = None
 
 usage = "usage: %prog [options] fromfile tofile"
 parser = argparse.ArgumentParser()
@@ -64,9 +23,9 @@ hlp = 'Set number of context lines (default: %(default)s)'
 parser.add_argument("-l", "--lines", type=int, default=3,
                     help=hlp)
 parser.add_argument('-i', '--input-format', dest='inputformat', default='ini',
-                    choices=supported_formats,
+                    choices=cfgdiff.supported_formats,
                     help='parse input as %s (default: %%(default)s)' %
-                    '/'.join(supported_formats))
+                    '/'.join(cfgdiff.supported_formats))
 parser.add_argument('-r', '--recursive', dest='recursive', action='store_true',
                     default=False,
                     help='recursively compare any subdirectories found')
@@ -76,7 +35,7 @@ parser.add_argument('-O', '--ordered-input', dest='ordered',
                     action="store_true",
                     default=False,
                     help='do not change order of options in the input')
-if reconfigure:
+if cfgdiff.reconfigure:
     hlp = 'Use this reconfigure.configs class (default: %(default)s)'
     parser.add_argument('-R', '--reconf-class', dest='reconfclass',
                         default='SambaConfig',
@@ -87,151 +46,21 @@ options = parser.parse_args()
 
 n = options.lines
 
-
-class SortedDict(collections.MutableMapping):
-    __slots__ = '_data'
-
-    def __init__(self):
-        self._data = {}
-
-    def __getitem__(self, key):
-        return self._data[key]
-
-    def __setitem__(self, key, value):
-        self._data[key] = value
-
-    def __delitem__(self, key):
-        del self._data[key]
-
-    def __iter__(self):
-        return iter(sorted(self._data))
-
-    def __len__(self):
-        return len(self._data)
-
-
-if configobj:
-    class StrippedConfigObj(configobj.ConfigObj):
-
-        def write(self, outfile=None, section=None):
-            if section is None:
-                section = self
-                self.initial_comment = ''
-                self.final_comment = ''
-            if not options.ordered:
-                section.scalars.sort()
-                section.sections.sort()
-            for entry in (section.scalars + section.sections):
-                section.comments[entry] = []
-                section.inline_comments[entry] = ''
-            if section is self:
-                section = None
-            return super(StrippedConfigObj, self).write(outfile, section)
-
-
-class DiffBase(object):
-
-    def __init__(self, filename):
-        self.filename = filename
-        self.pretty = StringIO()
-        self.error = None
-        if filename != '/dev/null' and os.path.getsize(filename) > 0:
-            try:
-                self.parse()
-            except Exception as e:
-                self.error = repr(e)
-
-    def parse(self):
-        pass
-
-    def readlines(self):
-        self.pretty.seek(0)
-        return self.pretty.readlines()
-
-
-class INIDiff(DiffBase):
-
-    def parse(self):
-        if options.ordered:
-            dicttype = collections.OrderedDict
-        else:
-            dicttype = SortedDict
-        if PY3:
-            self.config = configparser.RawConfigParser(allow_no_value=True,
-                                                       dict_type=dicttype,
-                                                       strict=False)
-        else:
-            self.config = configparser.RawConfigParser(allow_no_value=True,
-                                                       dict_type=dicttype)
-        self.config.read(self.filename)
-        self.config.write(self.pretty)
-
-
-class JSONDiff(DiffBase):
-
-    def parse(self):
-        sort_keys = options.ordered is False
-        with open(self.filename) as f:
-            self.config = json.load(f)
-            json.dump(self.config, self.pretty,
-                      sort_keys=sort_keys, indent=4,
-                      separators=(',', ': '))
-
-
-class YAMLDiff(DiffBase):
-
-    def parse(self):
-        with open(self.filename) as f:
-            self.config = yaml.safe_load(f)
-            yaml.safe_dump(self.config, self.pretty, default_flow_style=False,
-                           indent=2)
-
-
-class XMLDiff(DiffBase):
-
-    def parse(self):
-        parser = lxml.etree.XMLParser(remove_blank_text=True,
-                                      remove_comments=True)
-        self.config = lxml.etree.parse(self.filename, parser)
-        # via https://stackoverflow.com/a/8387132/1098563
-        if not options.ordered:
-            for parent in self.config.xpath('//*[./*]'):
-                parent[:] = sorted(parent, key=lambda x: x.tag)
-        self.config.write(self.pretty, pretty_print=True)
-
-
-class ConfigDiff(DiffBase):
-
-    def parse(self):
-        self.config = StrippedConfigObj(self.filename)
-        self.config.write(self.pretty)
-
-
-reconfcls = None
-
-
-class ReconfigureDiff(DiffBase):
-
-    def parse(self):
-        with open(self.filename) as f:
-            self.parser = reconfcls(content=f.read())
-            l = self.parser.load()
-            s = l.save()
-            self.pretty.write(s[None])
+parsercls = None
 
 if options.inputformat == 'ini':
-    cls = INIDiff
+    cls = cfgdiff.INIDiff
 elif options.inputformat == 'json':
-    cls = JSONDiff
+    cls = cfgdiff.JSONDiff
 elif options.inputformat == 'yaml':
-    cls = YAMLDiff
+    cls = cfgdiff.YAMLDiff
 elif options.inputformat == 'xml':
-    cls = XMLDiff
+    cls = cfgdiff.XMLDiff
 elif options.inputformat == 'conf':
-    cls = ConfigDiff
+    cls = cfgdiff.ConfigDiff
 elif options.inputformat == 'reconf':
-    exec "from reconfigure.configs import %s as reconfcls" % options.reconfclass
-    cls = ReconfigureDiff
+    exec "from reconfigure.configs import %s as parsercls" % options.reconfclass
+    cls = cfgdiff.ReconfigureDiff
 
 fromlist = []
 tolist = []
@@ -274,8 +103,8 @@ for fromfile, tofile in zip(fromlist, tolist):
             print('Only in %s: %s' % (options.tofile, x))
         continue
 
-    fromini = cls(fromfile)
-    toini = cls(tofile)
+    fromini = cls(fromfile, options.ordered, parsercls)
+    toini = cls(tofile, options.ordered, parsercls)
 
     if fromini.error:
         print("%s could not be parsed as a %s file:" % (fromfile, options.inputformat))
