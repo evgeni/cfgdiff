@@ -1,6 +1,8 @@
 cfgdiff -- `diff(1)` all your configuration files
 =================================================
 
+[![Build Status](https://travis-ci.org/evgeni/cfgdiff.png?branch=master)](https://travis-ci.org/evgeni/cfgdiff)
+
 Why?
 ----
 Ever tried comparing MySQL's `my.cnf` from a Debian and a Gentoo machine
