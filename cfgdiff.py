@@ -155,7 +155,10 @@ class XMLDiff(DiffBase):
         if not self.ordered:
             for parent in self.config.xpath('//*[./*]'):
                 parent[:] = sorted(parent, key=lambda x: x.tag)
-        self.config.write(self.pretty, pretty_print=True)
+        if PY3:
+            self.pretty.write(lxml.etree.tostring(self.config, encoding=str, pretty_print=True))
+        else:
+            self.pretty.write(lxml.etree.tostring(self.config, encoding=unicode, pretty_print=True))
 
 
 class ConfigDiff(DiffBase):
