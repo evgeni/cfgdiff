@@ -3,4 +3,8 @@ python:
   - "2.7"
   - "3.2"
   - "3.3"
-script: nosetests -v
+script:
+  - nosetests -v
+  - pep8 --ignore=E501 ./cfgdiff .
+  - ./cfgdiff -i ini ./test/test_same_1-a.ini ./test/test_same_1-b.ini
+  - ./cfgdiff -i json ./test/test_same_1-a.json ./test/test_same_1-b.json
