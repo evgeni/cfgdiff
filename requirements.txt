@@ -1,3 +1,4 @@
 PyYAML
+lxml
 configobj
 reconfigure
