@@ -59,7 +59,7 @@ elif options.inputformat == 'xml':
 elif options.inputformat == 'conf':
     cls = cfgdiff.ConfigDiff
 elif options.inputformat == 'reconf':
-    exec "from reconfigure.configs import %s as parsercls" % options.reconfclass
+    exec("from reconfigure.configs import %s as parsercls" % options.reconfclass)
     cls = cfgdiff.ReconfigureDiff
 
 fromlist = []
