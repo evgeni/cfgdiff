@@ -4,6 +4,7 @@ import collections
 
 PY2 = sys.version_info[0] == 2
 PY3 = sys.version_info[0] == 3
+version = '0.1-git'
 
 if PY2:
     from cStringIO import StringIO

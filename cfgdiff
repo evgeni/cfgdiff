@@ -10,7 +10,7 @@ import cfgdiff
 import difflib
 
 usage = "usage: %prog [options] fromfile tofile"
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(version=cfgdiff.version)
 parser.add_argument("-c", action="store_true", default=False,
                     help='Produce a context format diff (default)')
 parser.add_argument("-u", action="store_true", default=False,
