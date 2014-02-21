@@ -1,0 +1,44 @@
+.TH CFGDIFF "1" "February 2014" "cfgdiff 0.1" "User Commands"
+.SH NAME
+cfgdiff \- diff for configuration files
+.SH SYNOPSIS
+.B cfgdiff \fR[\fI\-h\fR|\fI\-v\fR|\fI\-c\fR|\fI\-u\fR|\fI\-m\fR|\fI\-n\fR|\fI\-l <lines>\fR|\fI\-i <inputtype>\fR|\fI\-r\fR|\fI\-N\fR|\fI\-N\fR|\fI\-R <reconfclass>\fR] fromfile tofile
+.SH OPTIONS
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+show this help message and exit
+.TP
+\fB\-v\fR, \fB\-\-version\fR
+show program's version number and exit
+.TP
+\fB\-c\fR
+Produce a context format diff (default)
+.TP
+\fB\-u\fR
+Produce a unified format diff
+.TP
+\fB\-m\fR
+Produce HTML side by side diff (can use \fB\-c\fR and \fB\-l\fR in
+conjunction)
+.TP
+\fB\-n\fR
+Produce a ndiff format diff
+.TP
+\fB\-l\fR, \fB\-\-lines\fR LINES
+Set number of context lines (default: 3)
+.TP
+\fB\-i\fR, \fB\-\-input\-format\fR {ini,json,yaml,xml,conf,reconf}
+parse input as ini/json/yaml/xml/conf/reconf (default: ini)
+.TP
+\fB\-r\fR, \fB\-\-recursive\fR
+recursively compare any subdirectories found
+.TP
+\fB\-N\fR, \fB\-\-new\-file\fR
+treat absent files as empty
+.TP
+\fB\-O\fR, \fB\-\-ordered\-input\fR
+do not change order of options in the input
+.TP
+\fB\-R\fR RECONFCLASS, \fB\-\-reconf\-class\fR RECONFCLASS
+Use this reconfigure.configs class (default:
+SambaConfig)
