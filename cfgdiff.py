@@ -9,6 +9,7 @@ if PY2:
     from cStringIO import StringIO
 else:
     from io import StringIO
+from io import BytesIO
 
 if PY3:
     import configparser
@@ -155,10 +156,8 @@ class XMLDiff(DiffBase):
         if not self.ordered:
             for parent in self.config.xpath('//*[./*]'):
                 parent[:] = sorted(parent, key=lambda x: x.tag)
-        if PY3:
-            self.pretty.write(lxml.etree.tostring(self.config, encoding=str, pretty_print=True))
-        else:
-            self.pretty.write(lxml.etree.tostring(self.config, encoding=unicode, pretty_print=True))
+        self.pretty = BytesIO()
+        self.config.write(self.pretty, pretty_print=True)
 
 
 class ConfigDiff(DiffBase):
