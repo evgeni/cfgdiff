@@ -45,6 +45,11 @@ try:
 except ImportError:
     reconfigure = None
 
+try:
+    import dns.zone
+    supported_formats.append('zone')
+except ImportError:
+    dns = None
 
 class SortedDict(collections.MutableMapping):
     __slots__ = '_data'
@@ -179,3 +184,10 @@ class ReconfigureDiff(DiffBase):
             l = self.config.load()
             s = l.save()
             self.pretty.write(s[None])
+
+
+class ZoneDiff(DiffBase):
+
+	def parse(self):
+		self.config = dns.zone.from_file(self.filename, 'example.com')
+		self.config.to_file(self.pretty, sorted=not self.ordered)

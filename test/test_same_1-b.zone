@@ -1,0 +1,15 @@
+$TTL 5m
+@ IN SOA ns.example.com. hostnamster.example.com. ( 
+	2013063002 ; serial 
+	5m ; refresh 
+	5m ; retry 
+	5m ; expiry 
+	5m) ; minimum 
+
+        IN      NS      ns.example.com. 
+	IN	NS	ns2.example.com.
+
+        IN      MX      10 mail 
+	IN      A       192.0.2.1
+imap	IN	A	192.0.2.2
+mail	IN	A	192.0.2.2

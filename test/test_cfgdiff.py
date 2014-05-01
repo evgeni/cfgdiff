@@ -104,3 +104,17 @@ class ReconfigureDiffTestCase(CfgDiffTestCase):
         self._test_different(cfgdiff.ReconfigureDiff,
                              './test/test_different_1-a.ini',
                              './test/test_different_1-b.ini', self.parser)
+
+
+@unittest.skipUnless('zone' in cfgdiff.supported_formats, 'requires dnspython')
+class ZoneDiffTestCase(CfgDiffTestCase):
+
+    def test_zone_same(self):
+        self._test_same(cfgdiff.ZoneDiff,
+                        './test/test_same_1-a.zone',
+                        './test/test_same_1-b.zone')
+
+    def test_zone_different(self):
+        self._test_different(cfgdiff.ZoneDiff,
+                             './test/test_different_1-a.zone',
+                             './test/test_different_1-b.zone')
