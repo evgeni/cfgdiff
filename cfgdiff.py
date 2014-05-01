@@ -171,6 +171,7 @@ class ConfigDiff(DiffBase):
 
     def parse(self):
         self.config = StrippedConfigObj(self.filename)
+        self.pretty = BytesIO()
         self.config.write(self.pretty, ordered=self.ordered)
 
 
