@@ -51,6 +51,7 @@ try:
 except ImportError:
     dns = None
 
+
 class SortedDict(collections.MutableMapping):
     __slots__ = '_data'
 
@@ -188,6 +189,6 @@ class ReconfigureDiff(DiffBase):
 
 class ZoneDiff(DiffBase):
 
-	def parse(self):
-		self.config = dns.zone.from_file(self.filename, 'example.com')
-		self.config.to_file(self.pretty, sorted=not self.ordered)
+    def parse(self):
+        self.config = dns.zone.from_file(self.filename, 'example.com')
+        self.config.to_file(self.pretty, sorted=not self.ordered)
