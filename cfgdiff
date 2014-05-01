@@ -80,7 +80,7 @@ if options.recursive and os.path.isdir(options.fromfile) and os.path.isdir(optio
     for root, _, files in os.walk(options.tofile):
         for f in files:
             x = os.path.join(root, f)
-            if not x in tolist:
+            if x not in tolist:
                 tolist.append(x)
                 y = os.path.join(options.fromfile, os.path.relpath(x, options.tofile))
                 if os.path.exists(y):
