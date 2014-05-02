@@ -51,6 +51,12 @@ try:
 except ImportError:
     dns = None
 
+try:
+    import pyjavaproperties
+    supported_formats.append('javaproperties')
+except ImportError:
+    pyjavaproperties = None
+
 
 class SortedDict(collections.MutableMapping):
     __slots__ = '_data'
@@ -193,3 +199,12 @@ class ZoneDiff(DiffBase):
     def parse(self):
         self.config = dns.zone.from_file(self.filename, 'example.com')
         self.config.to_file(self.pretty, sorted=not self.ordered)
+
+
+class JavaPropertiesDiff(DiffBase):
+
+    def parse(self):
+        with open(self.filename) as f:
+            self.config = pyjavaproperties.Properties()
+            self.config.load(f)
+            self.config.store(self.pretty)

@@ -118,3 +118,18 @@ class ZoneDiffTestCase(CfgDiffTestCase):
         self._test_different(cfgdiff.ZoneDiff,
                              './test/test_different_1-a.zone',
                              './test/test_different_1-b.zone')
+
+
+@unittest.skipUnless('javaproperties' in cfgdiff.supported_formats,
+                     'requires pyjavaproperties')
+class JavaPropertiesDiffTestCase(CfgDiffTestCase):
+
+    def test_javaproperties_same(self):
+        self._test_same(cfgdiff.JavaPropertiesDiff,
+                        './test/test_same_1-a.properties',
+                        './test/test_same_1-b.properties')
+
+    def test_javaproperties_different(self):
+        self._test_different(cfgdiff.JavaPropertiesDiff,
+                             './test/test_different_1-a.properties',
+                             './test/test_different_1-b.properties')
