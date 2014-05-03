@@ -51,6 +51,12 @@ try:
 except (ImportError, SyntaxError):
     dns = None
 
+try:
+    import iscpy
+    supported_formats.append('isc')
+except ImportError:
+    iscpy = None
+
 version = '0.1-git'
 
 
@@ -195,3 +201,11 @@ class ZoneDiff(DiffBase):
     def parse(self):
         self.config = dns.zone.from_file(self.filename, 'example.com')
         self.config.to_file(self.pretty, sorted=not self.ordered)
+
+
+class ISCDiff(DiffBase):
+
+    def parse(self):
+        with open(self.filename) as f:
+            self.config = iscpy.ParseISCString(iscpy.ScrubComments(f.read()))
+            self.pretty.write(iscpy.MakeISC(self.config))

@@ -64,6 +64,8 @@ elif options.inputformat == 'reconf':
     cls = cfgdiff.ReconfigureDiff
 elif options.inputformat == 'zone':
     cls = cfgdiff.ZoneDiff
+elif options.inputformat == 'isc':
+    cls = cfgdiff.ISCDiff
 
 fromlist = []
 tolist = []

@@ -118,3 +118,17 @@ class ZoneDiffTestCase(CfgDiffTestCase):
         self._test_different(cfgdiff.ZoneDiff,
                              './test/test_different_1-a.zone',
                              './test/test_different_1-b.zone')
+
+
+@unittest.skipUnless('isc' in cfgdiff.supported_formats, 'requires iscpy')
+class ISCDiffTestCase(CfgDiffTestCase):
+
+    def test_isc_same(self):
+        self._test_same(cfgdiff.ISCDiff,
+                        './test/test_same_1-a.isc',
+                        './test/test_same_1-b.isc')
+
+    def test_isc_different(self):
+        self._test_different(cfgdiff.ISCDiff,
+                             './test/test_different_1-a.isc',
+                             './test/test_different_1-b.isc')

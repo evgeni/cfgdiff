@@ -1,0 +1,7 @@
+# example comment
+zone "example.org" in {
+ type master;
+ file "/etc/bind/example.zone";
+ allow-query { any; };
+};
+
