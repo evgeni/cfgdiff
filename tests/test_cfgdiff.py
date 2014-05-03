@@ -91,20 +91,29 @@ class ConfigDiffTestCase(CfgDiffTestCase):
 class ReconfigureDiffTestCase(CfgDiffTestCase):
 
     def setUp(self):
-        configs = __import__('reconfigure.configs', fromlist=['reconfigure'])
-        self.parser = configs.SambaConfig
+        self.configs = __import__('reconfigure.configs', fromlist=['reconfigure'])
 
     @unittest.expectedFailure
     def test_reconf_same(self):
         self._test_same(cfgdiff.ReconfigureDiff,
                         './tests/test_same_1-a.ini',
-                        './tests/test_same_1-b.ini', self.parser)
+                        './tests/test_same_1-b.ini', self.configs.SambaConfig)
 
     def test_reconf_different(self):
         self._test_different(cfgdiff.ReconfigureDiff,
                              './tests/test_different_1-a.ini',
-                             './tests/test_different_1-b.ini', self.parser)
+                             './tests/test_different_1-b.ini', self.configs.SambaConfig)
 
+    @unittest.expectedFailure
+    def test_reconf_same_bind(self):
+        self._test_same(cfgdiff.ReconfigureDiff,
+                        './tests/test_same_1-a.isc',
+                        './tests/test_same_1-b.isc', self.configs.BIND9Config)
+
+    def test_reconf_different_bind(self):
+        self._test_different(cfgdiff.ReconfigureDiff,
+                             './tests/test_different_1-a.isc',
+                             './tests/test_different_1-b.isc', self.configs.BIND9Config)
 
 @unittest.skipUnless('zone' in cfgdiff.supported_formats, 'requires dnspython')
 class ZoneDiffTestCase(CfgDiffTestCase):
