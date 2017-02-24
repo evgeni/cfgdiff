@@ -52,6 +52,7 @@ except ImportError:
 
 version = '0.1-git'
 
+
 class SortedDict(collections.MutableMapping):
     __slots__ = '_data'
 
