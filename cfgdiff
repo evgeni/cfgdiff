@@ -160,8 +160,8 @@ for fromfile, tofile in zip(fromlist, tolist):
                                             numlines=n)
     elif options.m and options.recursive:
         diff = difflib.HtmlDiff().make_table(fromlines, tolines, fromfile,
-                                            tofile, context=options.c,
-                                            numlines=n)
+                                             tofile, context=options.c,
+                                             numlines=n)
         diff += "<br/>"
     else:
         diff = difflib.context_diff(fromlines, tolines, fromfile, tofile, n=n)
