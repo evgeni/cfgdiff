@@ -8,9 +8,6 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
-matrix:
-  allow_failures:
-    - python: "3.2"
 install:
   - pip install pep8
   - pip install -r requirements.txt
