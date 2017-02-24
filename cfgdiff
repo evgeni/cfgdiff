@@ -95,6 +95,35 @@ else:
     tolist.append(options.tofile)
 
 rc = 0
+
+# Print HTML header if HTML + recursive mode :
+header = """
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+
+<head>
+    <meta http-equiv="Content-Type"
+          content="text/html; charset=ISO-8859-1" />
+    <title></title>
+    <style type="text/css">
+        table.diff {font-family:Courier; border:medium;}
+        .diff_header {background-color:#e0e0e0}
+        td.diff_header {text-align:right}
+        .diff_next {background-color:#c0c0c0}
+        .diff_add {background-color:#aaffaa}
+        .diff_chg {background-color:#ffff77}
+        .diff_sub {background-color:#ffaaaa}
+    </style>
+</head>
+
+<body>
+"""
+
+if options.m and options.recursive:
+    sys.stdout.write(header)
+
 for fromfile, tofile in zip(fromlist, tolist):
     if '/dev/null' in (fromfile, tofile) and not options.newfile:
         rc = 1
@@ -125,14 +154,44 @@ for fromfile, tofile in zip(fromlist, tolist):
         diff = difflib.unified_diff(fromlines, tolines, fromfile, tofile, n=n)
     elif options.n:
         diff = difflib.ndiff(fromlines, tolines)
-    elif options.m:
+    elif options.m and not options.recursive:
         diff = difflib.HtmlDiff().make_file(fromlines, tolines, fromfile,
                                             tofile, context=options.c,
                                             numlines=n)
+    elif options.m and options.recursive:
+        diff = difflib.HtmlDiff().make_table(fromlines, tolines, fromfile,
+                                             tofile, context=options.c,
+                                             numlines=n)
+        diff += "<br/>"
     else:
         diff = difflib.context_diff(fromlines, tolines, fromfile, tofile, n=n)
 
     for line in diff:
         sys.stdout.write(line)
         rc = 1
+
+# Print HTML footer if HTML + recursive mode :
+footer = """
+    <table class="diff" summary="Legends">
+    <tr> <th colspan="2"> Legends </th> </tr>
+    <tr> <td> <table border="" summary="Colors">
+                  <tr><th> Colors </th> </tr>
+                  <tr><td class="diff_add">&nbsp;Added&nbsp;</td></tr>
+                  <tr><td class="diff_chg">Changed</td> </tr>
+                  <tr><td class="diff_sub">Deleted</td> </tr>
+              </table></td>
+         <td> <table border="" summary="Links">
+                  <tr><th colspan="2"> Links </th> </tr>
+                  <tr><td>(f)irst change</td> </tr>
+                  <tr><td>(n)ext change</td> </tr>
+                  <tr><td>(t)op</td> </tr>
+              </table></td> </tr>
+    </table>
+
+    </body>
+</html>
+"""
+if options.m and options.recursive:
+    sys.stdout.write(footer)
+
 sys.exit(rc)
