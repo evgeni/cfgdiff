@@ -47,7 +47,7 @@ except ImportError:
 try:
     import dns.zone
     supported_formats.append('zone')
-except ImportError:
+except (ImportError, SyntaxError):
     dns = None
 
 version = '0.1-git'
