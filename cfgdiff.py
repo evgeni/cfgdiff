@@ -40,8 +40,9 @@ except ImportError:
 
 try:
     import reconfigure
+    import reconfigure.configs
     supported_formats.append('reconf')
-except ImportError:
+except (ImportError, SyntaxError):
     reconfigure = None
 
 try:
