@@ -1,23 +1,22 @@
 import os
 import sys
 import collections
+import json
+
+from io import BytesIO
 
 PY2 = sys.version_info[0] == 2
 PY3 = sys.version_info[0] == 3
-version = '0.1-git'
 
 if PY2:
     from cStringIO import StringIO
 else:
     from io import StringIO
-from io import BytesIO
 
 if PY3:
     import configparser
 else:
     import ConfigParser as configparser
-
-import json
 
 supported_formats = ['ini', 'json']
 
@@ -51,6 +50,7 @@ try:
 except ImportError:
     dns = None
 
+version = '0.1-git'
 
 class SortedDict(collections.MutableMapping):
     __slots__ = '_data'
