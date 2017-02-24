@@ -14,7 +14,6 @@ matrix:
 install:
   - pip install pep8
   - pip install -r requirements.txt
-  - if [ "$TRAVIS_PYTHON_VERSION" = "2.7" ]; then pip install -r requirements-python2.txt; else pip install -r requirements-python3.txt; fi
 script:
   - nosetests -v
   - pep8 --ignore=E501 ./cfgdiff .
