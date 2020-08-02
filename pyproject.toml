@@ -1,0 +1,26 @@
+[build-system]
+requires = ["flit_core >=2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.metadata]
+module = "cfgdiff"
+author = "Evgeni Golov"
+author-email = "evgeni@golov.de"
+home-page = "https://github.com/evgeni/cfgdiff"
+classifiers = ["License :: OSI Approved :: MIT License"]
+description-file = "README.md"
+
+
+[tool.flit.metadata.requires-extra]
+zone = ["dnspython"]
+dev = ["flit"]
+conf = ["configobj"]
+reconf = ["reconfigure"]
+yaml = ["pyyaml"]
+xml = ["lxml"]
+allformats = ["configobj", "dnspython", "lxml", "pyyaml", "reconfigure"]
+test = ["pytest", "configobj", "dnspython", "lxml", "pyyaml", "reconfigure"]
+
+[tool.flit.scripts]
+cfgdiff = "cfgdiff.cli:main"
+
