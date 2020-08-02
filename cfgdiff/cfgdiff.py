@@ -185,8 +185,8 @@ class ReconfigureDiff(DiffBase):
     def parse(self):
         with open(self.filename) as f:
             self.config = self.parser(content=f.read())
-            l = self.config.load()
-            s = l.save()
+            loaded = self.config.load()
+            s = loaded.save()
             self.pretty.write(s[None])
 
 
