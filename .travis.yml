@@ -12,7 +12,6 @@ install:
   - pip install -r .[test,allformats]
 script:
   - pytest -v
-  - pycodestyle --ignore=E501 .
   - cfgdiff -v
   - cfgdiff -h
   - cfgdiff -i ini ./test/test_same_1-a.ini ./test/test_same_1-b.ini

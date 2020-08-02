@@ -1,6 +1,17 @@
 import unittest
 
+import pycodestyle
 from cfgdiff import cfgdiff
+
+
+class TestCodeFormat(unittest.TestCase):
+
+    def test_conformance(self):
+        """Test that we conform to PEP-8."""
+        style = pycodestyle.StyleGuide(max_line_length=100)
+        result = style.check_files(['.'])
+        self.assertEqual(result.total_errors, 0,
+                         "Found code style errors (and warnings).")
 
 
 class CfgDiffTestCase(unittest.TestCase):
