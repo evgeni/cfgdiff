@@ -15,7 +15,6 @@ from .cfgdiff import (
 
 
 def main():
-    usage = "usage: %prog [options] fromfile tofile"
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--version', action='version', version=__version__)
     parser.add_argument("-c", action="store_true", default=False,
