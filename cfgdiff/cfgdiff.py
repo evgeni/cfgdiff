@@ -1,8 +1,8 @@
+import json
 import os
 import sys
-import collections
-import json
-
+from collections import OrderedDict
+from collections.abc import MutableMapping
 from io import BytesIO
 
 PY2 = sys.version_info[0] == 2
@@ -54,7 +54,7 @@ except (ImportError, SyntaxError):
 version = '0.1'
 
 
-class SortedDict(collections.MutableMapping):
+class SortedDict(MutableMapping):
     __slots__ = '_data'
 
     def __init__(self):
@@ -121,7 +121,7 @@ class INIDiff(DiffBase):
 
     def parse(self):
         if self.ordered:
-            dicttype = collections.OrderedDict
+            dicttype = OrderedDict
         else:
             dicttype = SortedDict
         if PY3:
