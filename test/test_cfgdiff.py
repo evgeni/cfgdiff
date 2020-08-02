@@ -1,5 +1,6 @@
 import unittest
-import cfgdiff
+
+from cfgdiff import cfgdiff
 
 
 class CfgDiffTestCase(unittest.TestCase):
