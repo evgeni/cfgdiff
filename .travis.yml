@@ -9,12 +9,11 @@ python:
   - "3.5"
   - "3.6"
 install:
-  - pip install pep8
-  - pip install -r requirements.txt
+  - pip install -r .[test,allformats]
 script:
-  - nosetests -v
-  - pep8 --ignore=E501 ./cfgdiff .
-  - ./cfgdiff -v
-  - ./cfgdiff -h
-  - ./cfgdiff -i ini ./test/test_same_1-a.ini ./test/test_same_1-b.ini
-  - ./cfgdiff -i json ./test/test_same_1-a.json ./test/test_same_1-b.json
+  - pytest -v
+  - pycodestyle --ignore=E501 .
+  - cfgdiff -v
+  - cfgdiff -h
+  - cfgdiff -i ini ./test/test_same_1-a.ini ./test/test_same_1-b.ini
+  - cfgdiff -i json ./test/test_same_1-a.json ./test/test_same_1-b.json
