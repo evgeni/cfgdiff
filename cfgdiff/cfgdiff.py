@@ -51,7 +51,7 @@ try:
 except (ImportError, SyntaxError):
     dns = None
 
-version = '0.1-git'
+version = '0.1'
 
 
 class SortedDict(collections.MutableMapping):
