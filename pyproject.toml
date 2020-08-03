@@ -9,6 +9,7 @@ author-email = "evgeni@golov.de"
 home-page = "https://github.com/evgeni/cfgdiff"
 classifiers = ["License :: OSI Approved :: MIT License"]
 description-file = "README.md"
+requires-python = ">=3.2"
 
 
 [tool.flit.metadata.requires-extra]

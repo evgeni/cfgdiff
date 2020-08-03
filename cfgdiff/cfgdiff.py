@@ -1,22 +1,9 @@
+import configparser
 import json
 import os
-import sys
 from collections import OrderedDict
 from collections.abc import MutableMapping
-from io import BytesIO
-
-PY2 = sys.version_info[0] == 2
-PY3 = sys.version_info[0] == 3
-
-if PY2:
-    from cStringIO import StringIO
-else:
-    from io import StringIO
-
-if PY3:
-    import configparser
-else:
-    import ConfigParser as configparser
+from io import BytesIO, StringIO
 
 supported_formats = ['ini', 'json']
 
@@ -50,8 +37,6 @@ try:
     supported_formats.append('zone')
 except (ImportError, SyntaxError):
     dns = None
-
-version = '0.1'
 
 
 class SortedDict(MutableMapping):
@@ -124,13 +109,9 @@ class INIDiff(DiffBase):
             dicttype = OrderedDict
         else:
             dicttype = SortedDict
-        if PY3:
-            self.config = configparser.RawConfigParser(allow_no_value=True,
-                                                       dict_type=dicttype,
-                                                       strict=False)
-        else:
-            self.config = configparser.RawConfigParser(allow_no_value=True,
-                                                       dict_type=dicttype)
+        self.config = configparser.RawConfigParser(allow_no_value=True,
+                                                   dict_type=dicttype,
+                                                   strict=False)
         self.config.read(self.filename)
         self.config.write(self.pretty)
 
@@ -168,6 +149,10 @@ class XMLDiff(DiffBase):
         self.pretty = BytesIO()
         self.config.write(self.pretty, pretty_print=True)
 
+    def readlines(self):
+        self.pretty.seek(0)
+        return tuple(map(bytes.decode, self.pretty.readlines()))
+
 
 class ConfigDiff(DiffBase):
 
@@ -175,6 +160,10 @@ class ConfigDiff(DiffBase):
         self.config = StrippedConfigObj(self.filename)
         self.pretty = BytesIO()
         self.config.write(self.pretty, ordered=self.ordered)
+
+    def readlines(self):
+        self.pretty.seek(0)
+        return tuple(map(bytes.decode, self.pretty.readlines()))
 
 
 reconfcls = None
