@@ -1,4 +1,0 @@
-include *.1
-include README.md
-include test/*
-exclude test/*.pyc
