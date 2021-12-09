@@ -1,22 +1,14 @@
 import os
 import sys
-import collections
 import json
 
+from collections import OrderedDict
+from collections.abc import MutableMapping
 from io import BytesIO
 
-PY2 = sys.version_info[0] == 2
-PY3 = sys.version_info[0] == 3
+from io import StringIO
 
-if PY2:
-    from cStringIO import StringIO
-else:
-    from io import StringIO
-
-if PY3:
-    import configparser
-else:
-    import ConfigParser as configparser
+import configparser
 
 supported_formats = ['ini', 'json']
 
@@ -54,7 +46,7 @@ except (ImportError, SyntaxError):
 version = '0.1-git'
 
 
-class SortedDict(collections.MutableMapping):
+class SortedDict(MutableMapping):
     __slots__ = '_data'
 
     def __init__(self):
@@ -121,16 +113,12 @@ class INIDiff(DiffBase):
 
     def parse(self):
         if self.ordered:
-            dicttype = collections.OrderedDict
+            dicttype = OrderedDict
         else:
             dicttype = SortedDict
-        if PY3:
             self.config = configparser.RawConfigParser(allow_no_value=True,
                                                        dict_type=dicttype,
                                                        strict=False)
-        else:
-            self.config = configparser.RawConfigParser(allow_no_value=True,
-                                                       dict_type=dicttype)
         self.config.read(self.filename)
         self.config.write(self.pretty)
 
