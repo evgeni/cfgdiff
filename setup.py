@@ -1,3 +1,6 @@
+"""
+setup for cfgdiff
+"""
 from setuptools import setup
 from cfgdiff import version
 
@@ -17,7 +20,4 @@ setup(
         'ConfigObj support': ['ConfigObj'],
         'reconfigure support': ['reconfigure'],
     },
-    data_files=[
-        ('/usr/share/man/man1', ['cfgdiff.1'])
-    ]
 )
