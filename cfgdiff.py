@@ -47,7 +47,7 @@ try:
 except (ImportError, SyntaxError):
     dns = None  # pylint:disable=invalid-name
 
-version = '0.1-git'  # pylint:disable=invalid-name
+version = '0.1.0.dev0'  # pylint:disable=invalid-name
 
 
 class SortedDict(MutableMapping):
