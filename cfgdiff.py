@@ -1,5 +1,4 @@
 import os
-import sys
 import json
 
 from collections import OrderedDict
@@ -84,10 +83,10 @@ if configobj:
                 section.inline_comments[entry] = ''
             if section is self:
                 section = None
-            return super(StrippedConfigObj, self).write(outfile, section)
+            return super().write(outfile, section)
 
 
-class DiffBase(object):
+class DiffBase:
 
     def __init__(self, filename, ordered=False, parser=None):
         self.filename = filename
@@ -98,8 +97,8 @@ class DiffBase(object):
         if filename != '/dev/null' and os.path.getsize(filename) > 0:
             try:
                 self.parse()
-            except Exception as e:
-                self.error = repr(e)
+            except Exception as exc:
+                self.error = repr(exc)
 
     def parse(self):
         pass
@@ -127,8 +126,8 @@ class JSONDiff(DiffBase):
 
     def parse(self):
         sort_keys = self.ordered is False
-        with open(self.filename) as f:
-            self.config = json.load(f)
+        with open(self.filename, encoding='utf-8') as jsonfile:
+            self.config = json.load(jsonfile)
             json.dump(self.config, self.pretty,
                       sort_keys=sort_keys, indent=4,
                       separators=(',', ': '))
@@ -137,8 +136,8 @@ class JSONDiff(DiffBase):
 class YAMLDiff(DiffBase):
 
     def parse(self):
-        with open(self.filename) as f:
-            self.config = yaml.safe_load(f)
+        with open(self.filename, encoding='utf-8') as yamlfile:
+            self.config = yaml.safe_load(yamlfile)
             yaml.safe_dump(self.config, self.pretty, default_flow_style=False,
                            indent=2)
 
