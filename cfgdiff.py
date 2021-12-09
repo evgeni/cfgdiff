@@ -1,3 +1,7 @@
+"""
+cfgdiff - diff(1) all your configs
+"""
+
 import os
 import json
 
@@ -27,26 +31,30 @@ try:
     import configobj
     supported_formats.append('conf')
 except ImportError:
-    configobj = None
+    configobj = None  # pylint:disable=invalid-name
 
 try:
+    # pylint:disable = unused-import
     import reconfigure
     import reconfigure.configs
     supported_formats.append('reconf')
 except (ImportError, SyntaxError):
-    reconfigure = None
+    reconfigure = None  # pylint:disable=invalid-name
 
 try:
     import dns.zone
     supported_formats.append('zone')
 except (ImportError, SyntaxError):
-    dns = None
+    dns = None  # pylint:disable=invalid-name
 
-version = '0.1-git'
+version = '0.1-git'  # pylint:disable=invalid-name
 
 
 class SortedDict(MutableMapping):
-    __slots__ = '_data'
+    """
+    a dictionary that can be iterated in a sorted way
+    """
+    __slots__ = ('_data',)
 
     def __init__(self):
         self._data = {}
@@ -69,12 +77,15 @@ class SortedDict(MutableMapping):
 
 if configobj:
     class StrippedConfigObj(configobj.ConfigObj):
+        """
+        A ConfigObj without comments
+        """
 
-        def write(self, outfile=None, section=None, ordered=False):
+        def write(self, outfile=None, section=None, ordered=False):  # pylint:disable=arguments-differ
             if section is None:
                 section = self
-                self.initial_comment = ''
-                self.final_comment = ''
+                self.initial_comment = ''  # pylint:disable=attribute-defined-outside-init
+                self.final_comment = ''  # pylint:disable=attribute-defined-outside-init
             if not ordered:
                 section.scalars.sort()
                 section.sections.sort()
@@ -87,6 +98,11 @@ if configobj:
 
 
 class DiffBase:
+    """
+    Base class for all later diff types
+
+    Provides initialization and stub methods.
+    """
 
     def __init__(self, filename, ordered=False, parser=None):
         self.filename = filename
@@ -97,18 +113,27 @@ class DiffBase:
         if filename != '/dev/null' and os.path.getsize(filename) > 0:
             try:
                 self.parse()
-            except Exception as exc:
+            except Exception as exc:  # pylint:disable=broad-except
                 self.error = repr(exc)
 
     def parse(self):
-        pass
+        """
+        parse a file and store its representation
+        """
+        raise NotImplementedError
 
     def readlines(self):
+        """
+        read all lines of the pretty printed version
+        """
         self.pretty.seek(0)
         return self.pretty.readlines()
 
 
 class INIDiff(DiffBase):
+    """
+    compare ini files using a configparser
+    """
 
     def parse(self):
         if self.ordered:
@@ -123,6 +148,9 @@ class INIDiff(DiffBase):
 
 
 class JSONDiff(DiffBase):
+    """
+    compare JSON files
+    """
 
     def parse(self):
         sort_keys = self.ordered is False
@@ -134,6 +162,9 @@ class JSONDiff(DiffBase):
 
 
 class YAMLDiff(DiffBase):
+    """
+    compare YAML files using PyYAML
+    """
 
     def parse(self):
         with open(self.filename, encoding='utf-8') as yamlfile:
@@ -143,6 +174,9 @@ class YAMLDiff(DiffBase):
 
 
 class XMLDiff(DiffBase):
+    """
+    compare XML files using LXML
+    """
 
     def parse(self):
         parser = lxml.etree.XMLParser(remove_blank_text=True,
@@ -157,6 +191,9 @@ class XMLDiff(DiffBase):
 
 
 class ConfigDiff(DiffBase):
+    """
+    compare config files using ConfigObj
+    """
 
     def parse(self):
         self.config = StrippedConfigObj(self.filename)
@@ -164,10 +201,11 @@ class ConfigDiff(DiffBase):
         self.config.write(self.pretty, ordered=self.ordered)
 
 
-reconfcls = None
-
 
 class ReconfigureDiff(DiffBase):
+    """
+    compare config files using reconfigure
+    """
 
     def parse(self):
         with open(self.filename, encoding='utf-8') as reconffile:
@@ -178,6 +216,9 @@ class ReconfigureDiff(DiffBase):
 
 
 class ZoneDiff(DiffBase):
+    """
+    compare DNS zone files using dnspython
+    """
 
     def parse(self):
         self.config = dns.zone.from_file(self.filename, 'example.com')
