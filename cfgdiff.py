@@ -170,11 +170,11 @@ reconfcls = None
 class ReconfigureDiff(DiffBase):
 
     def parse(self):
-        with open(self.filename) as f:
-            self.config = self.parser(content=f.read())
-            l = self.config.load()
-            s = l.save()
-            self.pretty.write(s[None])
+        with open(self.filename, encoding='utf-8') as reconffile:
+            self.config = self.parser(content=reconffile.read())
+            loaded_config = self.config.load()
+            saved_config = loaded_config.save()
+            self.pretty.write(saved_config[None])
 
 
 class ZoneDiff(DiffBase):
